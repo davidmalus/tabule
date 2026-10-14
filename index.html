@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tabule Opletalova</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; color: #ddd; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  #board { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; cursor: none; }
+  #board img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  #menu { max-width: 640px; margin: 0 auto; padding: 48px 16px; }
+  #menu h1 { font-weight: 400; font-size: 32px; margin: 0 0 12px; }
+  #menu p { color: #999; line-height: 1.5; }
+  #menu a { display: block; color: #fff; font-size: 20px; padding: 14px 0; border-bottom: 1px solid #333; text-decoration: none; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div id="board" hidden><img id="img" alt="Tabule"></div>
+<div id="menu" hidden>
+  <h1>Tabule Opletalova 4 / 6</h1>
+  <p>Vyber displej. Na displeji zadej adresu včetně koncovky #recepce nebo #pasaz.</p>
+  <a href="#recepce">Recepce</a>
+  <a href="#pasaz">Pasáž</a>
+</div>
+<script>
+(function () {
+  var BOARDS = { recepce: "recepce.png", pasaz: "pasaz.png" };
+  var CHECK_MS = 5 * 60 * 1000;     // kontrola nové tabule
+  var RELOAD_MS = 6 * 60 * 60 * 1000; // úplné obnovení stránky
+
+  var key = (location.hash || "").replace("#", "").toLowerCase();
+  window.addEventListener("hashchange", function () { location.reload(); });
+
+  if (!BOARDS[key]) { document.getElementById("menu").hidden = false; return; }
+
+  var board = document.getElementById("board");
+  var img = document.getElementById("img");
+  board.hidden = false;
+  img.src = BOARDS[key] + "?t=" + Date.now();
+
+  // Nová verze obrázku se ukáže jen když se opravdu načte, takže výpadek sítě nechá na displeji starou tabuli.
+  setInterval(function () {
+    var probe = new Image();
+    probe.onload = function () { img.src = probe.src; };
+    probe.src = BOARDS[key] + "?t=" + Date.now();
+  }, CHECK_MS);
+
+  setInterval(function () { if (navigator.onLine !== false) location.reload(); }, RELOAD_MS);
+
+  try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
+})();
+</script>
+</body>
+</html>
