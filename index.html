@@ -26,28 +26,42 @@
 <script>
 (function () {
   var BOARDS = { recepce: "recepce.png", pasaz: "pasaz.png" };
-  var CHECK_MS = 5 * 60 * 1000;     // kontrola nové tabule
-  var RELOAD_MS = 6 * 60 * 60 * 1000; // úplné obnovení stránky
+  var CHECK_MS = 60 * 1000;            // jak často se ptát na novou verzi
+  var RELOAD_MS = 12 * 60 * 60 * 1000; // pojistka: úplné obnovení stránky
 
   var key = (location.hash || "").replace("#", "").toLowerCase();
   window.addEventListener("hashchange", function () { location.reload(); });
-
   if (!BOARDS[key]) { document.getElementById("menu").hidden = false; return; }
 
   var board = document.getElementById("board");
   var img = document.getElementById("img");
   board.hidden = false;
-  img.src = BOARDS[key] + "?t=" + Date.now();
+  var current = null;
 
-  // Nová verze obrázku se ukáže jen když se opravdu načte, takže výpadek sítě nechá na displeji starou tabuli.
-  setInterval(function () {
+  // Nový obrázek se ukáže až po úplném načtení, takže výpadek sítě nechá na displeji starou tabuli.
+  function show(ver) {
+    if (ver === current) return;
     var probe = new Image();
-    probe.onload = function () { img.src = probe.src; };
-    probe.src = BOARDS[key] + "?t=" + Date.now();
-  }, CHECK_MS);
+    probe.onload = function () { img.src = probe.src; current = ver; };
+    probe.src = BOARDS[key] + "?v=" + encodeURIComponent(ver);
+  }
 
+  function check() {
+    var x = new XMLHttpRequest();
+    x.open("GET", "verze.json?t=" + Date.now());
+    x.timeout = 15000;
+    x.onload = function () {
+      var ver = null;
+      try { ver = String(JSON.parse(x.responseText).versions[key] || ""); } catch (e) {}
+      show(ver || ("t" + Math.floor(Date.now() / 600000)));
+    };
+    x.onerror = x.ontimeout = function () { if (current === null) show("start"); };
+    x.send();
+  }
+
+  check();
+  setInterval(check, CHECK_MS);
   setInterval(function () { if (navigator.onLine !== false) location.reload(); }, RELOAD_MS);
-
   try { if (navigator.wakeLock) navigator.wakeLock.request("screen").catch(function () {}); } catch (e) {}
 })();
 </script>

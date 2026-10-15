@@ -7,11 +7,9 @@ Stránka pro dva displeje s tabulí nájemců.
 | Recepce | `https://davidmalus.github.io/tabule/#recepce` |
 | Pasáž | `https://davidmalus.github.io/tabule/#pasaz` |
 
-## Jak vyměnit tabuli
+Tabule sem nahrává program **Tabule** na počítači v recepci (převod z Excelu, tlačítko
+„Zobrazit na obou displejích“). Ručně tu není potřeba nic měnit.
 
-1. Připrav nový obrázek a pojmenuj ho přesně `recepce.png` nebo `pasaz.png`.
-2. Na GitHubu v tomhle repozitáři klikni na **Add file → Upload files**.
-3. Přetáhni soubor a dole klikni na **Commit changes**. Starý soubor se přepíše.
-4. Do pár minut se stránka aktualizuje a displeje si novou tabuli načtou samy (kontrolují každých 5 minut).
-
-Obrázky mají rozměr 3840 × 2160. Tabule pro pasáž je už otočená o 90°, protože televize visí na výšku.
+- `recepce.png`, `pasaz.png` – aktuální tabule (3840 × 2160, pasáž je už otočená)
+- `verze.json` – podle něj displeje poznají novou tabuli (kontrolují každou minutu)
+- `index.html` – stránka, kterou displeje zobrazují
